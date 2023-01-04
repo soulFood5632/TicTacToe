@@ -1,11 +1,9 @@
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class TicTacToeGame {
     private final GamePiece[] gameBoard;
-
-    private final List<Move> movesX;
-    private final List<Move> movesO;
+    private final Map<GamePiece[], Move> movesX;
+    private final Map<GamePiece[], Move> movesO;
 
     private final List<List<Integer>> listOfCombos = new ArrayList<>(){
         {
@@ -27,8 +25,8 @@ public class TicTacToeGame {
      */
     public TicTacToeGame() {
         gameBoard = new GamePiece[9];
-        movesX = new ArrayList<>();
-        movesO = new ArrayList<>();
+        movesX = new HashMap<>();
+        movesO = new HashMap<>();
     }
 
 
@@ -41,17 +39,23 @@ public class TicTacToeGame {
     }
 
 
-
+    /**
+     * Makes a move on this game.
+     * @param move the new position to add. Requires it is a valid move.
+     * @param turn the player who is making the move
+     * @return true if valid, false if invalid
+     */
     public boolean makeMove(Move move, GamePiece turn) {
+        if(turn == GamePiece.O) {
+            movesO.put(gameBoard.clone(), move);
+        } else {
+            movesX.put(gameBoard.clone(), move);
+        }
         if(gameBoard[move.rowNum * 3 + move.colNum] != null){
             return false;
         }
         gameBoard[move.rowNum * 3 + move.colNum] = turn;
-        if(turn == GamePiece.O) {
-            movesO.add(move);
-        } else {
-            movesX.add(move);
-        }
+
         return true;
     }
 
@@ -63,25 +67,39 @@ public class TicTacToeGame {
         if(isBoardFull()) {
             return true;
         }
-        return checkDiagonal() || checkVertical() || checkHorizontal();
+        for(List<Integer> values: listOfCombos){
+            if(checkEquals(values.get(0), values.get(1), values.get(2))){
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
      * Finds out who has won the game
+     *
+     * - Only be called when the game is complete
      * @return X if the game has been won by X, O if has been won by O, null
      * if there is a tie
      */
 
     public GamePiece whoWon(){
-        if(isBoardFull()) {
 
+        for(List<Integer> values: listOfCombos) {
+            if (checkEquals(values.get(0), values.get(1), values.get(2), GamePiece.X)) {
+                return GamePiece.X;
+            }
+            if (checkEquals(values.get(0), values.get(1), values.get(2), GamePiece.O)) {
+                return GamePiece.O;
+            }
         }
 
-    }
-
-    private boolean didTheyWin(GamePiece gamePiece) {
+        return null;
 
     }
+
+
+
 
 
 
@@ -97,38 +115,6 @@ public class TicTacToeGame {
     }
 
 
-
-    private boolean checkHorizontal() {
-        for(int starter = 0; starter < 3; starter++) {
-            if (checkEquals(starter * 3, starter * 3 + 1, starter * 3 + 2)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-
-
-    private boolean checkVertical() {
-        for(int starter = 0; starter < 3; starter++) {
-            if (checkEquals(starter, starter + 3, starter + 6)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private boolean checkDiagonal() {
-        if (checkEquals(0, 4, 8)) {
-            return true;
-        }
-        if (checkEquals(2, 4, 6)) {
-            return true;
-        }
-
-        return false;
-    }
-
     private boolean checkEquals(int one, int two, int three) {
         return gameBoard[one] == gameBoard[two] && gameBoard[two] == gameBoard[three];
     }
@@ -141,7 +127,7 @@ public class TicTacToeGame {
     @Override
     public boolean equals(Object other) {
         if (other instanceof TicTacToeGame) {
-            return gameBoard.equals(((TicTacToeGame) other).getBoard());
+            return Arrays.equals(gameBoard, ((TicTacToeGame) other).getBoard());
         }
         return false;
     }

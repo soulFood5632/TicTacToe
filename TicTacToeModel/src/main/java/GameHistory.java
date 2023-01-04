@@ -6,6 +6,4 @@ public class GameHistory {
 
     private final Map<GamePiece[], List<Map<Move, List<Integer>>>> history = new HashMap<>();
 
-
-    public void addToHistory(
 }
