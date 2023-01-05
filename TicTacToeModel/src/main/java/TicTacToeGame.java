@@ -1,22 +1,10 @@
 import java.util.*;
 
 public class TicTacToeGame {
-    private final GamePiece[] gameBoard;
-    private final Map<GamePiece[], Move> movesX;
-    private final Map<GamePiece[], Move> movesO;
+    private final Board gameBoard;
+    private final Map<Board, Move> movesX;
+    private final Map<Board, Move> movesO;
 
-    private final List<List<Integer>> listOfCombos = new ArrayList<>(){
-        {
-            add(List.of(0, 1, 2));
-            add(List.of(0, 4, 8));
-            add(List.of(0, 3, 6));
-            add(List.of(1, 4, 7));
-            add(List.of(2, 5, 8));
-            add(List.of(3, 4, 5));
-            add(List.of(6, 7, 8));
-            add(List.of(2, 4, 6));
-        }
-    };
 
 
 
@@ -24,7 +12,7 @@ public class TicTacToeGame {
      * Starts a new game with an emptyBoard
      */
     public TicTacToeGame() {
-        gameBoard = new GamePiece[9];
+        gameBoard = new Board();
         movesX = new HashMap<>();
         movesO = new HashMap<>();
     }
@@ -34,8 +22,8 @@ public class TicTacToeGame {
      * Returns the gameBoard
      * @return a 9 element array containing current
      */
-    public GamePiece[] getBoard() {
-        return gameBoard.clone();
+    public Board getBoard() {
+        return new Board(gameBoard.getBoard());
     }
 
 
@@ -51,12 +39,23 @@ public class TicTacToeGame {
         } else {
             movesX.put(gameBoard.clone(), move);
         }
-        if(gameBoard[move.rowNum * 3 + move.colNum] != null){
-            return false;
-        }
-        gameBoard[move.rowNum * 3 + move.colNum] = turn;
 
-        return true;
+        return gameBoard.makeMove(move, turn);
+
+
+    }
+
+    public static List<Move> validMoves(GamePiece[] gameBoard){
+        int index = 0;
+        List<Move> validMoves = new ArrayList<>();
+        for(GamePiece values: gameBoard){
+            if (values == null){
+                validMoves.add(new Move(index));
+            }
+            index++;
+        }
+
+        return validMoves;
     }
 
     /**
@@ -64,73 +63,35 @@ public class TicTacToeGame {
      * @return true if the game is over false otherwise
      */
     public boolean isGameOver() {
-        if(isBoardFull()) {
-            return true;
-        }
-        for(List<Integer> values: listOfCombos){
-            if(checkEquals(values.get(0), values.get(1), values.get(2))){
-                return true;
-            }
-        }
-        return false;
+        return gameBoard.isGameOver();
     }
 
     /**
      * Finds out who has won the game
-     *
      * - Only be called when the game is complete
      * @return X if the game has been won by X, O if has been won by O, null
      * if there is a tie
      */
 
     public GamePiece whoWon(){
+        return gameBoard.whoWon();
+    }
 
-        for(List<Integer> values: listOfCombos) {
-            if (checkEquals(values.get(0), values.get(1), values.get(2), GamePiece.X)) {
-                return GamePiece.X;
-            }
-            if (checkEquals(values.get(0), values.get(1), values.get(2), GamePiece.O)) {
-                return GamePiece.O;
-            }
+    public Map<Board, Move> getMoves(GamePiece gamePiece) {
+        if (gamePiece == GamePiece.X) {
+            return new HashMap<>(movesX);
+        } else {
+            return new HashMap<>(movesO);
         }
+    }
 
-        return null;
+    public void printString() {
+        gameBoard.printString();
+
 
     }
 
 
-
-
-
-
-
-
-    private boolean isBoardFull() {
-        for(GamePiece value: gameBoard) {
-            if(value == null) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-
-    private boolean checkEquals(int one, int two, int three) {
-        return gameBoard[one] == gameBoard[two] && gameBoard[two] == gameBoard[three];
-    }
-
-    private boolean checkEquals(int one, int two, int three, GamePiece gamePiece) {
-        return gameBoard[one] == gamePiece && gameBoard[two] == gamePiece && gamePiece == gameBoard[three];
-    }
-
-
-    @Override
-    public boolean equals(Object other) {
-        if (other instanceof TicTacToeGame) {
-            return Arrays.equals(gameBoard, ((TicTacToeGame) other).getBoard());
-        }
-        return false;
-    }
 
 
 

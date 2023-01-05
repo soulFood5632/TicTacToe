@@ -1,10 +1,9 @@
 public class Move {
-    public final int rowNum;
-    public final int colNum;
+    public final int number;
 
-    public Move(int rowNum, int colNum){
-        this.rowNum = rowNum;
-        this.colNum = colNum;
+
+    public Move(int rowNum){
+        this.number = rowNum;
     }
 
 }
