@@ -1,6 +1,6 @@
-import com.google.gson.Gson;
-import com.google.gson.JsonSerializer;
+import com.google.gson.*;
 
+import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,13 +26,12 @@ public class GameHistory {
     }
 
     public String saveData() {
-        Gson gson = new Gson();
+        GsonBuilder gson = new GsonBuilder();
+        gson.registerTypeHierarchyAdapter(Board.class, new BoardBuilder());
 
-        JsonSerializer<Board> boardJsonSerializer = new JsonSerializer<Board>(){
+        Gson specializedGson = gson.create();
 
-        }
-
-        return gson.toJson(history, HashMap.class);
+        return specializedGson.toJson(history);
     }
 
     public void addHistory(Map<Board, Move> moveMap, int winVal) {
@@ -68,9 +67,11 @@ public class GameHistory {
             Move[] currentMove = new Move[1];
 
             history.get(board).forEach((move, scores) -> {
-                if (scores[0] / (double) scores[1] > currentMax[0]){
-                    currentMove[0] = move;
-                    currentMax[0] = scores[0] /(double) scores[1];
+                if (scores[0] >= 1) {
+                    if (scores[0] / (double) scores[1] > currentMax[0]) {
+                        currentMove[0] = move;
+                        currentMax[0] = scores[0] / (double) scores[1];
+                    }
                 }
             });
 

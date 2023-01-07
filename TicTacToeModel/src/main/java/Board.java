@@ -1,3 +1,6 @@
+import com.google.gson.*;
+
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -90,6 +93,59 @@ public class Board implements Cloneable {
 
         return true;
     }
+
+    public static JsonSerializer<Board> boardJsonSerializer = new JsonSerializer<Board>(){
+        @Override
+        public JsonObject serialize(Board src, Type typeOfSrc, JsonSerializationContext context){
+            Gson gson = new Gson();
+            JsonObject boardJson = new JsonObject();
+            int[] gamePieceStore = new int[9];
+
+            /*
+            This serilization will
+             */
+            for(int index = 0; index < 9; index++){
+                if(src.gameBoard[index] == GamePiece.X){
+                    gamePieceStore[index] = 1;
+                } else if (src.gameBoard[index] == GamePiece.O){
+                    gamePieceStore[index] = 0;
+                } else {
+                    gamePieceStore[index] = -1;
+                }
+            }
+            boardJson.addProperty("Board", gson.toJson(gamePieceStore));
+
+            return boardJson;
+        }
+
+    };
+
+    public static JsonDeserializer<Board> deserializer = new JsonDeserializer<Board>() {
+        @Override
+        public Board deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+            JsonObject jsonObject = json.getAsJsonObject();
+
+            List<JsonElement> listElements = jsonObject.get("Board").getAsJsonArray().asList();
+
+            int index = 0;
+
+            GamePiece[] gamePieces = new GamePiece[9];
+
+
+            for(JsonElement element: listElements){
+                if(element.getAsInt() == 1){
+                    gamePieces[index] = GamePiece.X;
+                } else if (element.getAsInt() == 0){
+                    gamePieces[index] = GamePiece.O;
+                } else {
+                    gamePieces[index] = null;
+                }
+                index++;
+            }
+
+            return new Board(gamePieces);
+        }
+    };
 
     private boolean isBoardFull() {
         for(GamePiece value: gameBoard) {
